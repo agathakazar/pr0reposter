@@ -1,0 +1,3 @@
+python-telegram-bot
+pypr0
+requests
