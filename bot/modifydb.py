@@ -7,7 +7,8 @@ class Modifydb:
             CREATE TABLE IF NOT EXISTS main (
             id integer NOT NULL UNIQUE,
             url text,
-            sent text
+            sent text,
+            full text
             ); '''
      
     def __init__(self, db):
@@ -18,14 +19,14 @@ class Modifydb:
         self._db.close()
 
     # adds a row to db
-    def insert_data(self, id, url, sent):
-        self._db.execute('INSERT OR IGNORE INTO main (id, url, sent) VALUES (?,?,?)', (id,url,sent))
+    def insert_data(self, id, url, sent, full):
+        self._db.execute('INSERT OR IGNORE INTO main (id, url, sent, full) VALUES (?,?,?,?)', (id,url,sent,full))
 
   
 
     # selects url that is not sent 
     def select_unsent_url(self):
-        sql = 'SELECT id,url FROM main WHERE sent like ? ORDER BY id ASC LIMIT 1'
+        sql = 'SELECT id,url,full FROM main WHERE sent like ? ORDER BY id ASC LIMIT 1'
         return self._db.execute(sql, ('no',)).fetchone()
 
     # modify row as sent    

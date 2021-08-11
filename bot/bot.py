@@ -46,8 +46,28 @@ def update_bad_tags(context: CallbackContext) -> None:
             item_id = item['id']
             item_url = item['image']
             item_sent = 'yes'
-            md.insert_data(item_id, item_url, item_sent)
+            md.insert_data(item_id, item_url, item_sent, full=None)
     
+   
+    #print('Done')
+    return 
+
+def get_good_posts(context: CallbackContext) -> None:
+    md = modifydb.Modifydb('/pr0/database/main.db')
+    good_tags = ('anime')
+
+    for tag in good_tags: 
+        response = requests.get("https://pr0gramm.com/api/items/get?flags=1&promoted=0&tags=%s" % tag)
+        data = response.json()
+        ajson = data
+
+        for item in ajson['items']:
+            item_id = item['id']
+            item_url = item['image']
+            item_sent = 'no'
+            item_full = item['fullsize']
+            if (item['up'] - item['down'] > 50):
+                md.insert_data(item_id, item_url, item_sent, item_full)
    
     #print('Done')
     return 
@@ -89,7 +109,7 @@ def get_top_posts(context: CallbackContext) -> None:
     for post in top_posts:
         top_id = post['id']
         top_url = post['image']
-        md.insert_data(top_id, top_url, 'no')
+        md.insert_data(top_id, top_url, 'no', full=None)
 
 def send_post(context: CallbackContext) -> None:
     md = modifydb.Modifydb('/pr0/database/main.db')
@@ -102,6 +122,7 @@ def send_post(context: CallbackContext) -> None:
 
     unsent_id = unsent[0]
     unsent_url = unsent[1]
+    full_url = unsent[2]
 
     #print(unsent_id)
     #print(unsent_url)
@@ -112,10 +133,13 @@ def send_post(context: CallbackContext) -> None:
     if unsent_url.endswith(".jpg" or ".png"):
         full_unsent_url = pic_url + unsent_url
         logging.info('Sending: ' + str(unsent_id) + 'with url: ' + full_unsent_url)
-        context.bot.sendPhoto(chat_id='@repost_this', photo=full_unsent_url, timeout=100)
+        current_post = context.bot.sendPhoto(chat_id='@repost_this', photo=full_unsent_url, timeout=100)
+        if full_url is True:
+            full_unsent_url = pic_url + full_url
+            context.bot.send_document(chat_id='@repost_this', document=full_unsent_url, timeout=300, reply_to_message_id=current_post['message_id'])
     elif unsent_url.endswith(".mp4"):
         full_unsent_url = vid_url + unsent_url
-        logging.info('Sending: ' + str(unsent_id) + 'with url: ' + full_unsent_url)
+        logging.info('Sending: ' + str(unsent_id) + ' with url: ' + full_unsent_url)
         context.bot.sendVideo(chat_id='@repost_this', video=full_unsent_url, timeout=500)
     else:
         print('Something is wrong with ' + unsent_url)
@@ -123,7 +147,7 @@ def send_post(context: CallbackContext) -> None:
     md.set_sent(unsent_id)
 
     # would be weird if it works
-    random_sleep = random.randint(1,300)
+    random_sleep = random.randint(1,600)
     logging.info('Sleeping for ' + str(random_sleep))
 
     time.sleep(random_sleep)
@@ -161,8 +185,9 @@ def main():
       
     #random_seconds = lambda: random.randint(30,1200)
 
-    job_queue.run_repeating(update_bad_tags, interval=300, first=10)
-    job_queue.run_repeating(get_top_posts, interval=600, first=20)
+    job_queue.run_repeating(update_bad_tags, interval=120, first=5)
+    job_queue.run_repeating(get_top_posts, interval=180, first=10)
+    job_queue.run_repeating(get_good_posts, interval=360, first=15)
     job_queue.run_repeating(send_post, interval=60, first=30)
     #job_queue.run_once(send_post, when=69)
 
