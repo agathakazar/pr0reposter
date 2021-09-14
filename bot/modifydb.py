@@ -24,10 +24,15 @@ class Modifydb:
 
   
 
-    # selects url that is not sent 
-    def select_unsent_url(self):
-        sql = 'SELECT id,url,full FROM main WHERE sent like ? ORDER BY id ASC LIMIT 1'
-        return self._db.execute(sql, ('no',)).fetchone()
+    # selects pic url that is not sent 
+    def select_unsent_pic(self):
+        sql = 'SELECT id,url,full FROM main WHERE sent like ? and url not like ? ORDER BY id ASC LIMIT 1'
+        return self._db.execute(sql, ('no', '%.mp4',)).fetchone()
+
+
+    def select_unsent_vid(self):
+        sql = 'SELECT id,url,full FROM main WHERE sent like ? and url like ? ORDER BY id ASC LIMIT 1'
+        return self._db.execute(sql, ('no', '%.mp4',)).fetchone()
 
     # modify row as sent    
     def set_sent(self, id):

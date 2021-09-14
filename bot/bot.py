@@ -34,11 +34,11 @@ bot_api_key = os.environ.get("TG_BOT_KEY_PROWOZG")
 #requesting and then excluding posts by tags
 def update_bad_tags(context: CallbackContext) -> None:
     md = modifydb.Modifydb('/pr0/database/main.db')
-    ignored_tags = ('text', 'Nie+mehr+CDU', 'pol')
+    ignored_tags = ('text', 'Nie+mehr+CDU', 'pol', 'logo+nicht+verkackt')
 
     print('Updating ignored tags...')
     for tag in ignored_tags: 
-        response = requests.get("https://pr0gramm.com/api/items/get?flags=1&promoted=1&tags=%s" % tag)
+        response = requests.get("https://pr0gramm.com/api/items/get?flags=1&promoted=0&tags=%s" % tag)
         data = response.json()
         ajson = data
 
@@ -65,9 +65,8 @@ def get_good_posts(context: CallbackContext) -> None:
             item_id = item['id']
             item_url = item['image']
             item_sent = 'no'
-            item_full = item['fullsize']
             if (item['up'] - item['down'] > 50):
-                md.insert_data(item_id, item_url, item_sent, item_full)
+                md.insert_data(item_id, item_url, item_sent)
    
     #print('Done')
     return 
@@ -111,10 +110,17 @@ def get_top_posts(context: CallbackContext) -> None:
         top_url = post['image']
         md.insert_data(top_id, top_url, 'no', full=None)
 
+#trying to lessen the bad tags slipping in
+def update_everything(context: CallbackContext) -> None:
+    update_bad_tags(None)
+    get_top_posts(None)
+    get_good_posts(None)
+    logging.info('Everything updated')
+
 def send_post(context: CallbackContext) -> None:
     md = modifydb.Modifydb('/pr0/database/main.db')
     print('Selecting a post to send...')
-    unsent = md.select_unsent_url()
+    unsent = md.select_unsent_pic()
 
     if unsent is None:
         print('Nothing to post from DB...')
@@ -130,26 +136,29 @@ def send_post(context: CallbackContext) -> None:
     vid_url = 'https://vid.pr0gramm.com/'
     pic_url = 'https://img.pr0gramm.com/'
     
-    if unsent_url.endswith(".jpg" or ".png"):
-        full_unsent_url = pic_url + unsent_url
-        logging.info('Sending: ' + str(unsent_id) + 'with url: ' + full_unsent_url)
-        current_post = context.bot.sendPhoto(chat_id='@repost_this', photo=full_unsent_url, timeout=100)
-        if full_url is True:
-            full_unsent_url = pic_url + full_url
-            context.bot.send_document(chat_id='@repost_this', document=full_unsent_url, timeout=300, reply_to_message_id=current_post['message_id'])
-    elif unsent_url.endswith(".mp4"):
-        full_unsent_url = vid_url + unsent_url
-        logging.info('Sending: ' + str(unsent_id) + ' with url: ' + full_unsent_url)
-        context.bot.sendVideo(chat_id='@repost_this', video=full_unsent_url, timeout=500)
-    else:
-        print('Something is wrong with ' + unsent_url)
+    try:
+        if unsent_url.endswith(".jpg" or ".png"):
+            full_unsent_url = pic_url + unsent_url
+            logging.info('Sending: ' + str(unsent_id) + 'with url: ' + full_unsent_url)
+            context.bot.sendPhoto(chat_id='@repost_this', photo=full_unsent_url, timeout=20)
+            #if full_url is True:
+            #    full_unsent_url = pic_url + full_url
+            #    context.bot.send_document(chat_id='@repost_this', document=full_unsent_url, timeout=300, reply_to_message_id=current_post['message_id'])
+        elif unsent_url.endswith(".mp4"):
+            full_unsent_url = vid_url + unsent_url
+            logging.info('Sending: ' + str(unsent_id) + ' with url: ' + full_unsent_url)
+            context.bot.sendVideo(chat_id='@repost_this', video=full_unsent_url, timeout=40)
+        else:
+            print('Something is wrong with ' + unsent_url)
+    except:
+        logging.info('ERRORED OUT WHILE TRYING TO SEND ' + str(unsent_id) + 'with url: ' + full_unsent_url) 
+
     
     md.set_sent(unsent_id)
 
     # would be weird if it works
-    random_sleep = random.randint(1,600)
+    random_sleep = random.randint(1,300)
     logging.info('Sleeping for ' + str(random_sleep))
-
     time.sleep(random_sleep)
     
     
@@ -185,9 +194,10 @@ def main():
       
     #random_seconds = lambda: random.randint(30,1200)
 
-    job_queue.run_repeating(update_bad_tags, interval=120, first=5)
-    job_queue.run_repeating(get_top_posts, interval=180, first=10)
-    job_queue.run_repeating(get_good_posts, interval=360, first=15)
+    #job_queue.run_repeating(update_bad_tags, interval=120, first=5)
+    #job_queue.run_repeating(get_top_posts, interval=180, first=10)
+    #job_queue.run_repeating(get_good_posts, interval=360, first=15)
+    job_queue.run_repeating(update_everything, interval=120, first=5)
     job_queue.run_repeating(send_post, interval=60, first=30)
     #job_queue.run_once(send_post, when=69)
 
