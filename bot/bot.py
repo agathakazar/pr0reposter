@@ -34,7 +34,7 @@ bot_api_key = os.environ.get("TG_BOT_KEY_PROWOZG")
 #requesting and then excluding posts by tags
 def update_bad_tags(context: CallbackContext) -> None:
     md = modifydb.Modifydb('/pr0/database/main.db')
-    ignored_tags = ('text', 'Nie+mehr+CDU', 'pol', 'logo+nicht+verkackt')
+    ignored_tags = ('text', 'Nie+mehr+CDU', 'pol', 'logo+nicht+verkackt', 'Deutsch')
 
     print('Updating ignored tags...')
     for tag in ignored_tags: 
@@ -54,10 +54,12 @@ def update_bad_tags(context: CallbackContext) -> None:
 
 def get_good_posts(context: CallbackContext) -> None:
     md = modifydb.Modifydb('/pr0/database/main.db')
-    good_tags = ('anime')
+    good_tags = ('anime', 'kadse')
 
-    for tag in good_tags: 
-        response = requests.get("https://pr0gramm.com/api/items/get?flags=1&promoted=0&tags=%s" % tag)
+    for tag in good_tags:
+        request_string = 'https://pr0gramm.com/api/items/get?tags={}'.format(tag)
+        logging.info('Trying: ' + request_string)
+        response = requests.get(request_string)
         data = response.json()
         ajson = data
 
@@ -65,8 +67,12 @@ def get_good_posts(context: CallbackContext) -> None:
             item_id = item['id']
             item_url = item['image']
             item_sent = 'no'
-            if (item['up'] - item['down'] > 50):
-                md.insert_data(item_id, item_url, item_sent)
+            item_up = item['up']
+            item_down = item['down']
+            item_score = item_up - item_down
+            logging.info('Got: ' + str(item_id) + 'with score: ' + str(item_score))
+            if (item_score > 50):
+                md.insert_data(item_id, item_url, item_sent, full=None)
    
     #print('Done')
     return 
