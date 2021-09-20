@@ -107,6 +107,18 @@ def get_top_posts(context: CallbackContext) -> None:
     for post in top_posts:
         top_id = post['id']
         top_url = post['image']
+        top_audio = post['audio']
+        top_height = post['height']
+        top_width = post['width']
+
+        #not adding if the post has audio
+        if top_audio is True:
+            continue
+        
+        #longposts are not welcome
+        if (((top_width + top_height // 2) // top_width) > 3):
+            continue
+
         md.insert_data(top_id, top_url, 'no', full=None)
 
 #trying to lessen the bad tags slipping in
