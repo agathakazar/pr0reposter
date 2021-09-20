@@ -22,7 +22,9 @@ class Modifydb:
     def insert_data(self, id, url, sent, full):
         self._db.execute('INSERT OR IGNORE INTO main (id, url, sent, full) VALUES (?,?,?,?)', (id,url,sent,full))
 
-  
+    def select_unsent(self):
+        sql = 'SELECT id,url FROM main WHERE sent like ? ORDER BY id ASC LIMIT 1'
+        return self._db.execute(sql, ('no',)).fetchone()
 
     # selects pic url that is not sent 
     def select_unsent_pic(self):
@@ -31,7 +33,7 @@ class Modifydb:
 
 
     def select_unsent_vid(self):
-        sql = 'SELECT id,url,full FROM main WHERE sent like ? and url like ? ORDER BY id ASC LIMIT 1'
+        sql = 'SELECT id,url FROM main WHERE sent like ? and url like ? ORDER BY id ASC LIMIT 1'
         return self._db.execute(sql, ('no', '%.mp4',)).fetchone()
 
     # modify row as sent    

@@ -111,15 +111,20 @@ def get_top_posts(context: CallbackContext) -> None:
         top_height = post['height']
         top_width = post['width']
 
-        #not adding if the post has audio
-        if top_audio is True:
+        logging.info('Looking at ' + str(top_id) + ' it has ' + str(top_audio) + ' and width and height are ' + str(top_height) + ' x ' + str(top_width) )
+
+        #not adding if audio is True
+        if top_audio:
+            logging.info('Triggered audio = true on ' + str(top_id))
             continue
         
         #longposts are not welcome
-        if (((top_width + top_height // 2) // top_width) > 3):
+        elif (((top_width + top_height // 2) // top_width) > 3):
+            logging.info('triggered longpost on ' + str(top_id))
             continue
-
-        md.insert_data(top_id, top_url, 'no', full=None)
+       
+        else:    
+            md.insert_data(top_id, top_url, 'no', '')
 
 #trying to lessen the bad tags slipping in
 def update_everything(context: CallbackContext) -> None:
