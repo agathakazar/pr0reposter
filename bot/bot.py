@@ -22,14 +22,10 @@ logging.basicConfig(
 
 bot_persistence = PicklePersistence(filename='persistence_file')
 
-
 logger = logging.getLogger(__name__)
 
 #get api key from os environment
 bot_api_key = os.environ.get("TG_BOT_KEY_PROWOZG")
-
-#random_seconds = 69
-
 
 #requesting and then excluding posts by tags
 def update_bad_tags(context: CallbackContext) -> None:
@@ -37,8 +33,9 @@ def update_bad_tags(context: CallbackContext) -> None:
     ignored_tags = ('text', 'Nie+mehr+CDU', 'pol', 'logo+nicht+verkackt', 'Deutsch', 'Baerbock')
 
     print('Updating ignored tags...')
-    for tag in ignored_tags: 
-        response = requests.get("https://pr0gramm.com/api/items/get?flags=1&promoted=0&tags=%s" % tag)
+    for tag in ignored_tags:
+        request_string = 'https://pr0gramm.com/api/items/get?tags={}'.format(tag)
+        response = requests.get(request_string)
         data = response.json()
         ajson = data
 
@@ -86,10 +83,6 @@ def get_top_posts(context: CallbackContext) -> None:
     api = Api() 
 
     time_days = 2
-    #try:
-    #    time_days = float(input("?: "))
-    #except Exception as e:
-    #    print("[!] input has to be a number (using standard => 1 day)")
 
     top_posts = Posts()
     max_date = None
