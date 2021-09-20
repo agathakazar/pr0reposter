@@ -136,7 +136,7 @@ def update_everything(context: CallbackContext) -> None:
 def send_post(context: CallbackContext) -> None:
     md = modifydb.Modifydb('/pr0/database/main.db')
     print('Selecting a post to send...')
-    unsent = md.select_unsent_pic()
+    unsent = md.select_unsent()
 
     if unsent is None:
         print('Nothing to post from DB...')
@@ -144,7 +144,6 @@ def send_post(context: CallbackContext) -> None:
 
     unsent_id = unsent[0]
     unsent_url = unsent[1]
-    full_url = unsent[2]
 
     #print(unsent_id)
     #print(unsent_url)
@@ -157,9 +156,6 @@ def send_post(context: CallbackContext) -> None:
             full_unsent_url = pic_url + unsent_url
             logging.info('Sending: ' + str(unsent_id) + 'with url: ' + full_unsent_url)
             context.bot.sendPhoto(chat_id='@repost_this', photo=full_unsent_url, timeout=20)
-            #if full_url is True:
-            #    full_unsent_url = pic_url + full_url
-            #    context.bot.send_document(chat_id='@repost_this', document=full_unsent_url, timeout=300, reply_to_message_id=current_post['message_id'])
         elif unsent_url.endswith(".mp4"):
             full_unsent_url = vid_url + unsent_url
             logging.info('Sending: ' + str(unsent_id) + ' with url: ' + full_unsent_url)
