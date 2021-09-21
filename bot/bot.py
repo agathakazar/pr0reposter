@@ -30,7 +30,7 @@ bot_api_key = os.environ.get("TG_BOT_KEY_PROWOZG")
 #requesting and then excluding posts by tags
 def update_bad_tags(context: CallbackContext) -> None:
     md = modifydb.Modifydb('/pr0/database/main.db')
-    ignored_tags = ('text', 'Nie+mehr+CDU', 'pol', 'logo+nicht+verkackt', 'Deutsch', 'Baerbock')
+    ignored_tags = ('text', 'Nie+mehr+CDU', 'pol', 'logo+nicht+verkackt', 'Deutsch', 'Baerbock', 'dashcam')
 
     print('Updating ignored tags...')
     for tag in ignored_tags:
