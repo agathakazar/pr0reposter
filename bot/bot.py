@@ -43,7 +43,7 @@ def update_bad_tags(context: CallbackContext) -> None:
             item_id = item['id']
             item_url = item['image']
             item_sent = 'yes'
-            md.insert_data(item_id, item_url, item_sent, full=None)
+            md.insert_data(item_id, item_url, item_sent, '')
     
    
     #print('Done')
@@ -66,10 +66,14 @@ def get_good_posts(context: CallbackContext) -> None:
             item_sent = 'no'
             item_up = item['up']
             item_down = item['down']
+            item_audio = item['audio']
             item_score = item_up - item_down
             #logging.info('Got: ' + str(item_id) + 'with score: ' + str(item_score))
             if (item_score > 50):
-                md.insert_data(item_id, item_url, item_sent, full=None)
+                if item_audio:
+                    md.insert_data(item_id, item_url, item_sent, 'yes')
+                else:
+                    md.insert_data(item_id, item_url, item_sent, 'no')
    
     #print('Done')
     return 
@@ -119,12 +123,12 @@ def get_top_posts(context: CallbackContext) -> None:
             continue
         
         #longposts are not welcome
-        elif (((top_width + top_height // 2) // top_width) > 3):
+        if (((top_width + top_height // 2) // top_width) > 3):
             logging.info('triggered longpost on ' + str(top_id))
             continue
-       
-        else:    
-            md.insert_data(top_id, top_url, 'no', '')
+        
+        md.insert_data(top_id, top_url, 'no', '')
+        logging.info('Added this post to DB: ' + str(top_id))
 
 #trying to lessen the bad tags slipping in
 def update_everything(context: CallbackContext) -> None:

@@ -8,7 +8,7 @@ class Modifydb:
             id integer NOT NULL UNIQUE,
             url text,
             sent text,
-            full text
+            audio text
             ); '''
      
     def __init__(self, db):
@@ -19,22 +19,22 @@ class Modifydb:
         self._db.close()
 
     # adds a row to db
-    def insert_data(self, id, url, sent, full):
-        self._db.execute('INSERT OR IGNORE INTO main (id, url, sent, full) VALUES (?,?,?,?)', (id,url,sent,full))
+    def insert_data(self, id, url, sent, audio):
+        self._db.execute('INSERT OR IGNORE INTO main (id, url, sent, audio) VALUES (?,?,?,?)', (id,url,sent,audio))
 
     def select_unsent(self):
-        sql = 'SELECT id,url FROM main WHERE sent like ? ORDER BY id ASC LIMIT 1'
-        return self._db.execute(sql, ('no',)).fetchone()
+        sql = 'SELECT id,url FROM main WHERE sent like ? and audio like ? ORDER BY id ASC LIMIT 1'
+        return self._db.execute(sql, ('no', 'no')).fetchone()
 
     # selects pic url that is not sent 
     def select_unsent_pic(self):
-        sql = 'SELECT id,url,full FROM main WHERE sent like ? and url not like ? ORDER BY id ASC LIMIT 1'
+        sql = 'SELECT id,url FROM main WHERE sent like ? and url not like ? ORDER BY id ASC LIMIT 1'
         return self._db.execute(sql, ('no', '%.mp4',)).fetchone()
 
 
     def select_unsent_vid(self):
-        sql = 'SELECT id,url FROM main WHERE sent like ? and url like ? ORDER BY id ASC LIMIT 1'
-        return self._db.execute(sql, ('no', '%.mp4',)).fetchone()
+        sql = 'SELECT id,url FROM main WHERE sent like ? and audio like ? ORDER BY id ASC LIMIT 1'
+        return self._db.execute(sql, ('no', 'yes',)).fetchone()
 
     # modify row as sent    
     def set_sent(self, id):
