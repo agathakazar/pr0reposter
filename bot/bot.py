@@ -115,20 +115,21 @@ def get_top_posts(context: CallbackContext) -> None:
         top_height = post['height']
         top_width = post['width']
 
-        logging.info('Looking at ' + str(top_id) + ' it has ' + str(top_audio) + ' and width and height are ' + str(top_height) + ' x ' + str(top_width) )
+        #logging.info('Looking at ' + str(top_id) + ' it has ' + str(top_audio) + ' and width and height are ' + str(top_height) + ' x ' + str(top_width) )
 
         #not adding if audio is True
         if top_audio:
-            logging.info('Triggered audio = true on ' + str(top_id))
-            continue
+            #logging.info('Triggered audio = true on ' + str(top_id))
+            md.insert_data(top_id, top_url, 'no', 'yes')
         
         #longposts are not welcome
-        if (((top_width + top_height // 2) // top_width) > 3):
-            logging.info('triggered longpost on ' + str(top_id))
-            continue
+        elif (((top_width + top_height // 2) // top_width) > 3):
+            #logging.info('triggered longpost on ' + str(top_id))
+            md.insert_data(top_id, top_url, 'yes', 'no')
         
-        md.insert_data(top_id, top_url, 'no', '')
-        logging.info('Added this post to DB: ' + str(top_id))
+        else:
+            #logging.info('Added this post to DB: ' + str(top_id))
+            md.insert_data(top_id, top_url, 'no', 'no')
 
 #trying to lessen the bad tags slipping in
 def update_everything(context: CallbackContext) -> None:
@@ -160,7 +161,7 @@ def send_post(context: CallbackContext) -> None:
             full_unsent_url = pic_url + unsent_url
             logging.info('Sending: ' + str(unsent_id) + 'with url: ' + full_unsent_url)
             context.bot.sendPhoto(chat_id='@repost_this', photo=full_unsent_url, timeout=20)
-        elif unsent_url.endswith(".mp4"):
+        elif unsent_url.endswith(".mp4" or ".gif"):
             full_unsent_url = vid_url + unsent_url
             logging.info('Sending: ' + str(unsent_id) + ' with url: ' + full_unsent_url)
             context.bot.sendVideo(chat_id='@repost_this', video=full_unsent_url, timeout=40)

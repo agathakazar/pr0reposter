@@ -23,8 +23,8 @@ class Modifydb:
         self._db.execute('INSERT OR IGNORE INTO main (id, url, sent, audio) VALUES (?,?,?,?)', (id,url,sent,audio))
 
     def select_unsent(self):
-        sql = 'SELECT id,url FROM main WHERE sent like ? and audio like ? ORDER BY id ASC LIMIT 1'
-        return self._db.execute(sql, ('no', 'no')).fetchone()
+        sql = 'SELECT id,url FROM main WHERE sent like ? and audio not like ? ORDER BY id ASC LIMIT 1'
+        return self._db.execute(sql, ('no', 'yes')).fetchone()
 
     # selects pic url that is not sent 
     def select_unsent_pic(self):
